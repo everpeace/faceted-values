@@ -1,4 +1,4 @@
-Haskeell Implementation of Faceted Values [![Build Status](https://travis-ci.org/everpeace/faceted-values.svg?branch=master)](https://travis-ci.org/everpeace/faceted-values)
+Haskell Implementation of Faceted Values [![Build Status](https://travis-ci.org/everpeace/faceted-values.svg?branch=master)](https://travis-ci.org/everpeace/faceted-values)
 ----
 _Faceted values_ can be a very strong primitive for _privacy sensitive values_.
 
