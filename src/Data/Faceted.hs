@@ -59,12 +59,9 @@ instance Functor (Faceted ctx) where
 -- 2
 instance Applicative (Faceted ctx) where
     pure val = Faceted (const True) (val, val)
-    Faceted  pf (fh, fl) <*> Faceted pa (ah, al)  = CFaceted pf (Faceted pa (fh ah, fh al),
-                                                                 Faceted pa (fl ah, fl al) )
-    CFaceted pf (fh, fl) <*> a@(Faceted _ _)      = CFaceted pf (fh<*>a, fl<*>a)
-    f@(Faceted _ _)      <*> CFaceted pa (ah, al) = CFaceted pa (f<*>ah, f<*>al)
-    CFaceted pf (fh, fl) <*> CFaceted pa (ah, al) = CFaceted pf (CFaceted pa (fh<*>ah, fh<*>al),
-                                                                 CFaceted pa (fl<*>ah, fl<*>al))
+    Faceted  pf (fh, fl) <*> a = CFaceted pf ( fmap fh a, fmap fl a)
+    CFaceted pf (fh, fl) <*> a = CFaceted pf ( fh <*> a , fl <*> a )
+
 
 -- | Facted is an Monad in terms of value.
 --
