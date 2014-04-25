@@ -12,3 +12,5 @@ Inspired by Thomas H. Austin and Cormac Flanagan, ["Multiple Facets for Dynamic 
 As you can see, _faceted value_ can be a very strong primitive for supporting _privacy sensitive value_ in programming language level.
 
 [Jeeves](http://jeeveslang.org), a programming language for automatically enforcing privacy policies, is also based _faceted values_.
+
+haddoc is [here](http://everpeace.github.io/faceted-values/faceted/index.html).
