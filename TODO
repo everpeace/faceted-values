@@ -1,6 +1,5 @@
 TODO:
-  - introduce labels to policy agnostic.
-    - env ==> Map String (ctx -> Bool)
-    - Faceted String value
+  - introduce labels to make it  policy agnostic.
   - example projects.
   - more type class instances.(traversable?, foldable?)
+  - make TODO be issues.
