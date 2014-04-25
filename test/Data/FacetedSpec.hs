@@ -20,7 +20,7 @@ monad_do = do a <- simple
 
 spec :: Spec
 spec = do
-  describe "faceted value simple = < (x > 0) ? 1 : 0>" $ do
+  describe "faceted value simple =  Faceted (\\x -> x > 0) (1, 0) (which is equivalent with < (x > 0) ? 1 : 0>)" $ do
     it "observation with context 1 should be 1" $
       observe simple 1 `shouldBe` 1
 
@@ -28,7 +28,7 @@ spec = do
       observe simple 0 `shouldBe` 0
 
 
-  describe "Functor: ((*3) `fmap` simple) should be < (x > 0) ? 1*3 : 0*3> " $ do
+  describe "Functor: ((*3) `fmap` simple) should be equivalent with < (x > 0) ? 1*3 : 0*3> " $ do
     it "observation with context 1 should be 3" $
       observe ((*3) `fmap` simple) 1 `shouldBe` 3
 
@@ -36,7 +36,7 @@ spec = do
       observe ((*3) `fmap` simple) 0 `shouldBe` 0
 
 
-  describe "Applicative: ((+) <$> simple <*> simple) should be < (x > 0) ? 1+1 : 0+0>" $ do
+  describe "Applicative: ((+) <$> simple <*> simple) should  be equivalent with < (x > 0) ? 1+1 : 0+0>" $ do
     it "observation with context 1 should be 3" $
       observe ((+) <$> simple <*> simple) 1 `shouldBe` 2
 
@@ -47,7 +47,7 @@ spec = do
           ++"\t do a <- simple\n"
           ++"\t    b <- simple\n"
           ++"\t    return a+b\n"
-          ++"\tshould be\n"
+          ++"\tshould be equivalent with\n"
           ++"\t  < (x > 0) ? 1+1 : 0+0>") $ do
     it "observation with context 1 should be 3" $
       observe ap_do 1 `shouldBe` 2
@@ -55,7 +55,7 @@ spec = do
       observe ap_do 0 `shouldBe` 0
 
   describe ("Bind: simple >>= (\\v -> Faceted (\\y -> y < 2) (v + 1, v + 3))\n"
-          ++"\tshoule be\n"
+          ++"\tshoule be equivalent with\n"
           ++"\t  < (x > 0) ? < (y < 2) ? 1+1, 1+3> : < (y < 2) ? 0+1, 0+3> >") $ do
     it "observation with context 2 should be 4" $
       observe (simple >>= (\v -> Faceted (\y -> y < 2) (v + 1, v + 3))) 2 `shouldBe` 4
@@ -69,7 +69,7 @@ spec = do
           ++"\tdo a <- simple\n"
           ++"\t   b <- simple\n"
           ++"\t   Faceted (\\y -> y < 2) (a*b, a+b)\n"
-          ++"\tshoule be\n"
+          ++"\tshoule be equivalent with\n"
           ++"\t  < (x > 0) ? < (y < 2) ? 1*1, 1+1> : < (y < 2) ? 0*0, 0-0> >") $ do
     it "observation with context 2 should be 2" $
       observe monad_do 2 `shouldBe` 2
