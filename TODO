@@ -1,5 +1,11 @@
 TODO:
-  - introduce labels to make it  policy agnostic.
+  - introduce labels and type Env = (Label -> (ctx -> Bool)).
+    - types would be
+      - Faceted a = Faceted Label aH aL
+      - runFaceted:: Faceted a -> Env -> ctx -> a
   - example projects.
-  - more type class instances.(traversable?, foldable?)
+  - write monad trans tests.
   - make TODO be issues.
+  - more type class instances.
+    - Faceted cannot be foldable.  It is because that nested faceted has bunch of principles in internal nodes and these cannot be folded.  In the first place, faceted value is a model for ONE conditional value.  So, It was very strange if faceted values are foldable.
+    - So, Faceted cannot be traversable consequently.
