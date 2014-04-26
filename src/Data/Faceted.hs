@@ -19,8 +19,7 @@ data Faceted ctx val = CFaceted (ctx -> Bool) (Faceted ctx val) (Faceted ctx val
                      | Faceted  (ctx -> Bool) val val
                        deriving (Show)
 
--- |
--- principal extractor
+-- | principal extractor
 principal :: Faceted ctx val -> (ctx -> Bool)
 principal (Faceted  p _ _) = p
 principal (CFaceted p _ _) = p
