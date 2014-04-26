@@ -14,9 +14,14 @@ import Text.Show.Functions
 --
 -- Principal is modeled by (ctx -> Bool). True means observer is private one, false means private one.
 --
--- Note that faceted value can be nested: \< k1 ? \< k2 ? V_H : V_L\> : \< k3 ? W_H : W_L\> \>
+-- (Facet (\x -> x > 0) 1 0) is equivalent with \< x>0 ? 1 : 0 \>.
+--
+-- Note that faceted value can be nested: \< k1 ? \< k2 ? V_H : V_L\> : \< k3 ? W_H : W_L\> \>.
+-- To create nested faceted value, use CFaceted data constructor.
+--
+-- CFacet (\x -> x > 0) (Facet (\y -> y > 1) 4 3) (Facet (\z -> z < 2) 2 1)
 data Faceted ctx val = CFaceted (ctx -> Bool) (Faceted ctx val) (Faceted ctx val)
-                     | Faceted  (ctx -> Bool) val val
+                     | Faceted (ctx -> Bool) val val
                        deriving (Show, Functor)
 
 -- | principal extractor
