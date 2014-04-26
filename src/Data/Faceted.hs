@@ -5,8 +5,7 @@
 -- Inspired by Thomas H. Austin and Cormac Flanagan,
 -- <http://users.soe.ucsc.edu/~cormac/papers/popl12b.pdf "Multiple Facets for Dynamic Information Flow.">
 ----------------------
-module Data.Faceted (Faceted (Faceted), principal, runFaceted, observe,
-                     FacetedT (FacetedT), runFacetedT, observeT ) where
+module Data.Faceted (Faceted (Faceted), principal, runFaceted, observe) where
 
 import Control.Applicative
 import Text.Show.Functions
@@ -82,31 +81,3 @@ instance Monad (Faceted ctx) where
 join :: Faceted ctx (Faceted ctx val) -> Faceted ctx val
 join (Faceted  p fH fL) = CFaceted p fH fL
 join (CFaceted p fH fL) = CFaceted p (join fH) (join fL)
-
-----------------------
--- | FacetedT: Faceted Value which can be a monad transformer.
-----------------------
-data FacetedT ctx m val = FacetedT {unwrapped :: m (Faceted ctx val)}
-
--- | FacetedT executor which also support faceted execution
-runFacetedT :: Functor m => FacetedT ctx m val -> ctx -> m val
-runFacetedT fctdT ctx = (\fctd -> runFaceted fctd ctx) `fmap` (unwrapped fctdT)
-
--- | an idiom for runFacetedT
-observeT :: Functor m => FacetedT ctx m val -> ctx -> m val
-observeT = runFacetedT
-
-
--- | Monad transformer instance
---
--- Note that A Monad m which is composed with FacetedT should be also Applicative.
-instance (Applicative m, Monad m) => Monad (FacetedT ctx m) where
-  return val             = FacetedT (return  (return val))
-  (FacetedT mfctd) >>= f = FacetedT $ do fctd <- mfctd
-                                         fmap join (traverse (unwrapped.f) fctd)
-    where
-      -- Faceted can not be Traversable because Faceted can not be foldable.
-      -- But we can just swap them
-      traverse :: (Applicative f) => (a -> f b) -> Faceted ctx a -> f (Faceted ctx b)
-      traverse g (Faceted  p vh vl) = Faceted  p <$> g vh          <*> g vl
-      traverse g (CFaceted p vh vl) = CFaceted p <$> traverse g vh <*> traverse g vl
