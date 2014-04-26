@@ -27,6 +27,7 @@ library
   exposed-modules:   Data.Faceted
   -- other-modules:
   build-depends:     base ==4.6.*
+                   , free
 
 test-suite spec
   type:                 exitcode-stdio-1.0
