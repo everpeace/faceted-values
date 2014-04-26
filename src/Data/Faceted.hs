@@ -73,5 +73,8 @@ instance Applicative (Faceted ctx) where
 -- 3
 instance Monad (Faceted ctx) where
     return = pure
-    Faceted  pa ah al >>= f = CFaceted pa (f ah)    (f al)
-    CFaceted pa ah al >>= f = CFaceted pa (ah >>=f) (al >>= f)
+    fctd >>= f = join $ fmap f fctd
+
+join :: Faceted ctx (Faceted ctx val) -> Faceted ctx val
+join (Faceted  p fH fL) = CFaceted p fH fL
+join (CFaceted p fH fL) = CFaceted p (join fH) (join fL)
