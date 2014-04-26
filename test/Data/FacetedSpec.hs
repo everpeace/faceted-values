@@ -92,11 +92,11 @@ spec = do
           ++"\t                                : <(y < 3)? 10*(2+8) : 100*(2+8)>>\n"
           ++"\t                : < (1 < x < 4) ? <(y < 3)? 10*(2+4) : 100*(2+4)>\n"
           ++"\t                                : <(y < 3)? 10*(2+8) : 100*(2+8)>>") $ do
-    it "observation with context 1 should be 9  (= 1 + 8)." $
+    it "observation with context 1 should be 90   (= 10 * (1 + 8))." $
       observe monad_do 1 `shouldBe` 90
-    it "observation with context 2 should be 5  (= 1 + 4)." $
+    it "observation with context 2 should be 50   (= 10 * (1 + 4))." $
       observe monad_do 2 `shouldBe` 50
-    it "observation with context 3 should be 6  (= 2 + 4)." $
+    it "observation with context 3 should be 600  (= 100 * (2 + 4))." $
       observe monad_do 3 `shouldBe` 600
-    it "observation with context 4 should be 10 (= 2 + 8)." $
+    it "observation with context 4 should be 1000 (= 100 * (2 + 8))." $
       observe monad_do 4 `shouldBe` 1000
