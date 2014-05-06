@@ -1,22 +1,42 @@
 {-# LANGUAGE DeriveFunctor #-}
 ----------------------
--- | Faceted values with faceted execution.
+-- | Faceted values with faceted execution
 --
 -- Inspired by Thomas H. Austin and Cormac Flanagan,
 -- <http://users.soe.ucsc.edu/~cormac/papers/popl12b.pdf "Multiple Facets for Dynamic Information Flow.">
+--
+-- A faceted value \< k ? V_H : V_L\> is a triple consisting of a principal @k@ and two values @V_H@ and @V_L@.
+-- Intuitively, this faceted value appears as @V_H@ to private observers that can view @k@’s private data,
+-- and as @V_L@ to other public observers. We refer to @V_H@ and @V_L@ as private and public facets, respectively.
+--
+-- This module supports intuitive syntax suger by (?) and (.:) operators.
+-- Use (??) operator instead of (?) when you declare nested faceted values.
+-- In this module, principal is modeled by @(ctx -> Bool)@.
+-- Returning @True@ means @ctx@ is a private observer, @False@ means it is a public observer.
+--
+-- @
+-- (\x -> x > 0) ? 1 .: 0
+-- (\x -> x > 0) ?? ((\y -> y > 1) ? 4 .: 3) .: ((\z -> z < 2) ? 2 .: 1)
+-- @
+--
+-- To observe faceted value, use 'observe' or 'runFaceted' function.
+-- When observing faceted values, returning True means that the observer is private one, False means public one.
+--
+-- @
+-- observe ((\x -> x ==\"Me\") ? 1 .: 0) \"Me\"
+-- 1
+-- observe ((\x -> x =="Me") ? 1 .: 0) \"SomeOne\"
+-- 0
+-- @
 ----------------------
 module Data.Faceted (Faceted, (?), (??), (.:), constF, principal, runFaceted, observe) where
 
 import Control.Monad.Free
 import Text.Show.Functions
 
--- | Faceted Value: \< k ? V_H : V_L\>
+-- | Type for Faceted Value: \< k ? V_H : V_L\>
 --
--- Principal is modeled by (ctx -> Bool). True means observer is private one, false means private one.
---
--- Facted values can be declared in very intuitive manner: (\\x -> x > 0) ? 1 .: 0
---
--- Use (??) operator instead of (?) when you declare nested faceted values: (\\x -> x > 0) ?? ((\\y -> y > 1) ? 4 .: 3) .: ((\\z -> z < 2) ? 2 .: 1)
+-- Please Note that this type utilizes `Control.Monad.Free`.
 type Faceted ctx a = Free (Facets ctx) a
 data Facets ctx a = Facet (ctx -> Bool) a a
                   | Facets (ctx -> Bool) (Facets ctx a) (Facets ctx a)
@@ -25,7 +45,13 @@ data Facets ctx a = Facet (ctx -> Bool) a a
 facet :: (ctx -> Bool) -> (a,a) -> Faceted ctx a
 facet p (h, l) = Free (Facet p (Pure h) (Pure l))
 
--- constF is equivalent with \< true ? a : _|_ \>
+-- | @ (constF a) @ is equivalent with @ (const True) ? a .: a @
+--
+-- This would be useful when you declare like below:
+--
+-- @
+-- ( \"Me\" ?? (constF myLocation) .: \"CoWorker\" ? \"Office\" .: \"In the City\")
+-- @
 constF :: a -> Faceted ctx a
 constF a = facet (const True) (a, a)
 
@@ -37,16 +63,22 @@ facets p (Pure h, Pure l) = facet p (h, l)
 
 infix 1 ??, ?
 -- | Constructor for unnested faceted values
--- e.g. (\x -> x > 0) ? 2 .: 1)
 --
--- a will be treated as Value in this faceted value.
--- This means that Faceted ctx (Faceted ctx b) can be possible.
--- Note that Faceted ctx (Faceted ctx b) is essentially different from nested faceted values.
+-- @
+-- (\x -> x > 0) ? 2 .: 1
+-- @
+--
+-- The value in (?) operator will be treated as values in this faceted value.
+-- This means that @Faceted ctx (Faceted ctx b)@ can be possible.
+-- Note that @Faceted ctx (Faceted ctx b)@ is essentially different from nested faceted values.
 (?) :: (ctx -> Bool) -> (a, a) -> Faceted ctx a
 (?) = facet
 
 -- | Constructor for nested faceted values
--- e.g. (\\x -> x > 0) ?? ((\\y -> y > 1) ? 4 .: 3) .: ((\\z -> z < 2) ? 2 .: 1)
+--
+-- @
+-- (\x -> x > 0) ?? ((\y -> y > 1) ? 4 .: 3) .: ((\z -> z < 2) ? 2 .: 1)
+-- @
 (??) :: (ctx -> Bool) -> (Faceted ctx a, Faceted ctx a) -> Faceted ctx a
 (??) = facets
 
@@ -66,11 +98,9 @@ run :: Facets ctx a -> ctx -> a
 run (Facets p vH vL) ctx = if p ctx then run vH ctx else run vL ctx
 run (Facet  p vH vL) ctx = if p ctx then vH else vL
 
--- | Evaluator for faceted values.
--- Its semantics is faceted execution denoted in the paper above.
---
 -- >>> runFaceted ( (const True) ? True .: False) 1
 -- True
+--
 -- >>> runFaceted ( (const False) ? True .: False) 1
 -- False
 --
@@ -86,6 +116,14 @@ run (Facet  p vH vL) ctx = if p ctx then vH else vL
 -- faceted is monad.
 -- >>> runFaceted (((\x -> 0 < x && x < 3) ? 1 .: 2) >>= \v -> ((\x -> 1 < x && x < 4) ? (v+4) .: (v+8))) 3
 -- 6
+-- | Evaluator for faceted values.  Its semantics is faceted execution denoted in the paper above.
+--
+-- @
+-- observe ((\x -> x ==\"Me\") ? 1 .: 0) \"Me\"
+-- 1
+-- observe ((\x -> x =="Me") ? 1 .: 0) \"SomeOne\"
+-- 0
+-- @
 runFaceted :: Faceted ctx a -> ctx -> a
 runFaceted (Pure a) ctx = a
 runFaceted (Free (Facet  p vH vL)) ctx = if p ctx then runFaceted vH ctx else runFaceted vL ctx
