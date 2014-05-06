@@ -5,7 +5,7 @@
 -- Inspired by Thomas H. Austin and Cormac Flanagan,
 -- <http://users.soe.ucsc.edu/~cormac/papers/popl12b.pdf "Multiple Facets for Dynamic Information Flow.">
 ----------------------
-module Data.Faceted (Faceted, (?), (??), (.:), principal, runFaceted, observe) where
+module Data.Faceted (Faceted, (?), (??), (.:), constF, principal, runFaceted, observe) where
 
 import Control.Monad.Free
 import Text.Show.Functions
@@ -25,12 +25,23 @@ data Facets ctx a = Facet (ctx -> Bool) a a
 facet :: (ctx -> Bool) -> (a,a) -> Faceted ctx a
 facet p (h, l) = Free (Facet p (Pure h) (Pure l))
 
+-- constF is equivalent with \< true ? a : _|_ \>
+constF :: a -> Faceted ctx a
+constF a = facet (const True) (a, a)
+
 facets :: (ctx -> Bool) -> (Faceted ctx a, Faceted ctx a) -> Faceted ctx a
 facets p (Free h, Free l) = Free (Facets p h l)
+facets p (Pure h, Free l) = facets p (constF h, Free l)
+facets p (Free h, Pure l) = facets p (Free h, constF l)
+facets p (Pure h, Pure l) = facet p (h, l)
 
 infix 1 ??, ?
 -- | Constructor for unnested faceted values
 -- e.g. (\x -> x > 0) ? 2 .: 1)
+--
+-- a will be treated as Value in this faceted value.
+-- This means that Faceted ctx (Faceted ctx b) can be possible.
+-- Note that Faceted ctx (Faceted ctx b) is essentially different from nested faceted values.
 (?) :: (ctx -> Bool) -> (a, a) -> Faceted ctx a
 (?) = facet
 
