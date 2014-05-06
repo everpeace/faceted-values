@@ -35,10 +35,10 @@ distance (a,b) (c,d) = sqrt $ (a'-c')*(a'-c') + (b'-d')*(b'-d')
     c' = fromIntegral c
     d' = fromIntegral d
 
-distanceTo :: User -> User -> Faceted User Double
-distanceTo he she= do locHe <- locationOf he
-                      locShe <- locationOf she
-                      return (distance locHe locShe)
+distanceBtw :: User -> User -> Faceted User Double
+distanceBtw he she= do locHe <- locationOf he
+                       locShe <- locationOf she
+                       return (distance locHe locShe)
 
 spec :: Spec
 spec = do
@@ -56,8 +56,8 @@ spec = do
 
   describe "distance can be varied by observers" $ do
     it "distance btw alice and bob observed by alice should be d((123,456), (230,560))" $
-      (observe (distanceTo alice bob) alice) `shouldBe` (distance (123, 456) (230, 560))
+      (observe (distanceBtw alice bob) alice) `shouldBe` (distance (123, 456) (230, 560))
     it "distance btw alice and bob observed by bob should be d((120, 450), (234, 567))" $
-      (observe (distanceTo alice bob) bob) `shouldBe` (distance (120, 450) (234, 567))
+      (observe (distanceBtw alice bob) bob) `shouldBe` (distance (120, 450) (234, 567))
     it "distance btw alice and bob observed by bob should be d((100, 400), (200, 500))" $
-      (observe (distanceTo alice bob) carl) `shouldBe` (distance (100, 400) (200, 500))
+      (observe (distanceBtw alice bob) carl) `shouldBe` (distance (100, 400) (200, 500))
