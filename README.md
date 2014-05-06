@@ -24,7 +24,7 @@ $ cabal test
 ```
 How to use
 ==
-please see [test](https://github.com/everpeace/faceted-values/blob/master/test/Data/FacetedSpec.hs).
+please see [test](https://github.com/everpeace/faceted-values/blob/master/test/Data/FacetedSpec.hs) or [examples](https://github.com/everpeace/faceted-values/tree/master/examples/Data/Faceted/Examples).
 
 or, test log could be useful to understand how-to easily.
 ```
